@@ -7,6 +7,8 @@
     "start": "node run.mjs",
     "dev:server": "tsx server/src/index.ts",
     "dev:web": "vite web --config web/vite.config.ts --host 127.0.0.1 --port 5173",
+    "test:server": "vitest --config server/vitest.config.ts run",
+    "test:server:watch": "vitest --config server/vitest.config.ts",
     "test:web": "vitest --config web/vitest.config.ts run",
     "test:web:watch": "vitest --config web/vitest.config.ts"
   },
