@@ -193,4 +193,47 @@ describe("App", () => {
       await screen.findByText("Guest name does not match room"),
     ).toBeInTheDocument();
   });
+
+  it("keeps booking as successful when refresh fails after submit", async () => {
+    mockedFetchMapData
+      .mockResolvedValueOnce(sampleMap)
+      .mockRejectedValueOnce(new Error("Map refresh unavailable"));
+    mockedBookCabana.mockResolvedValueOnce({
+      message: "ok",
+      booking: {
+        cabanaId: "A-01",
+        roomNumber: "207",
+        guestName: "Jane Doe",
+        bookedAt: new Date().toISOString(),
+      },
+    });
+
+    render(<App />);
+
+    await screen.findByRole("region", { name: "Resort map" });
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Cabana A-01 (available)" }),
+    );
+
+    fireEvent.change(screen.getByLabelText("Room number"), {
+      target: { value: "207" },
+    });
+    fireEvent.change(screen.getByLabelText("Guest name"), {
+      target: { value: "Jane Doe" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Confirm Booking" }));
+
+    expect(
+      await screen.findByText(
+        "Booking confirmed for Jane Doe (room 207) at A-01.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText("Map refresh unavailable"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Booking failed. Please try again."),
+    ).not.toBeInTheDocument();
+  });
 });

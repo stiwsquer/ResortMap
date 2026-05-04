@@ -176,12 +176,21 @@ export function App(): JSX.Element {
 
     try {
       await bookCabana(cabanaId, formData);
-      await refreshMap();
-
       setSuccessMessage(
         `Booking confirmed for ${formData.guestName} (room ${formData.roomNumber}) at ${cabanaId}.`,
       );
       setSuccessCountdown(SUCCESS_DIALOG_AUTO_CLOSE_SECONDS);
+
+      try {
+        await refreshMap();
+      } catch (error) {
+        setUnavailableToast(
+          toErrorMessage(
+            error,
+            "Booking succeeded, but failed to refresh map. Please reload the page.",
+          ),
+        );
+      }
     } catch (error) {
       const message = toErrorMessage(
         error,

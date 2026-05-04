@@ -40,6 +40,14 @@ export function BookingModal({
   const triggerRef = useRef<Element | null>(null);
   const closeOnOverlayClickRef = useRef(false);
 
+  const requestClose = useCallback((): void => {
+    if (isSubmitting) {
+      return;
+    }
+
+    onCancel();
+  }, [isSubmitting, onCancel]);
+
   function handleOverlayMouseDown(event: MouseEvent<HTMLDivElement>): void {
     closeOnOverlayClickRef.current = event.target === event.currentTarget;
   }
@@ -48,7 +56,7 @@ export function BookingModal({
     const clickedOverlay = event.target === event.currentTarget;
 
     if (clickedOverlay && closeOnOverlayClickRef.current) {
-      onCancel();
+      requestClose();
     }
 
     closeOnOverlayClickRef.current = false;
@@ -57,7 +65,7 @@ export function BookingModal({
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onCancel();
+        requestClose();
         return;
       }
 
@@ -82,33 +90,48 @@ export function BookingModal({
         }
       }
     },
-    [onCancel],
+    [requestClose],
   );
 
   useEffect(() => {
-    if (isOpen) {
-      triggerRef.current = document.activeElement;
-      setRoomNumber("");
-      setGuestName("");
-      setErrorMessage("");
-      document.addEventListener("keydown", handleKeyDown);
-
-      requestAnimationFrame(() => {
-        const firstInput =
-          modalRef.current?.querySelector<HTMLElement>("input, button");
-        firstInput?.focus();
-      });
+    if (!isOpen) {
+      return;
     }
+
+    triggerRef.current = document.activeElement;
+    setRoomNumber("");
+    setGuestName("");
+    setErrorMessage("");
+
+    requestAnimationFrame(() => {
+      const firstInput =
+        modalRef.current?.querySelector<HTMLElement>("input, button");
+      firstInput?.focus();
+    });
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-
-      if (!isOpen && triggerRef.current instanceof HTMLElement) {
-        triggerRef.current.focus();
-        triggerRef.current = null;
-      }
     };
   }, [isOpen, handleKeyDown]);
+
+  useEffect(() => {
+    if (isOpen) {
+      return;
+    }
+
+    if (triggerRef.current instanceof HTMLElement) {
+      triggerRef.current.focus();
+      triggerRef.current = null;
+    }
+  }, [isOpen]);
 
   if (!isOpen) {
     return null;
@@ -177,7 +200,7 @@ export function BookingModal({
               <button
                 type="button"
                 className="button-primary"
-                onClick={onCancel}
+                onClick={requestClose}
               >
                 Close
               </button>
@@ -244,7 +267,7 @@ export function BookingModal({
                 <button
                   type="button"
                   className="button-secondary"
-                  onClick={onCancel}
+                  onClick={requestClose}
                   disabled={isSubmitting}
                 >
                   Cancel

@@ -110,4 +110,49 @@ describe("BookingModal", () => {
 
     expect(onCancel).not.toHaveBeenCalled();
   });
+
+  it("does not close on escape while submitting", () => {
+    const { onCancel } = renderModal({ isSubmitting: true });
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it("restores focus to trigger after close", () => {
+    const trigger = document.createElement("button");
+    trigger.textContent = "Open";
+    document.body.appendChild(trigger);
+    trigger.focus();
+
+    const { rerender } = render(
+      <BookingModal
+        isOpen
+        cabanaId="A-01"
+        isSubmitting={false}
+        submitErrorMessage=""
+        successMessage=""
+        successCountdown={null}
+        onCancel={() => undefined}
+        onSubmit={() => undefined}
+      />,
+    );
+
+    rerender(
+      <BookingModal
+        isOpen={false}
+        cabanaId="A-01"
+        isSubmitting={false}
+        submitErrorMessage=""
+        successMessage=""
+        successCountdown={null}
+        onCancel={() => undefined}
+        onSubmit={() => undefined}
+      />,
+    );
+
+    expect(document.activeElement).toBe(trigger);
+
+    trigger.remove();
+  });
 });
