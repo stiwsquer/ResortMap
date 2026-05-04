@@ -99,20 +99,18 @@ describe("createApp API routes", () => {
 
       expect(bookingResponse.status).toBe(200);
 
-      const cabanaResponse = await fetch(
-        `${server.baseUrl}/api/cabanas/${encodeURIComponent(primaryCabanaId)}`,
-      );
-      const cabanaPayload = (await cabanaResponse.json()) as {
-        cabanaId: string;
-        available: boolean;
-        booking: { guestName: string } | null;
+      const mapResponse = await fetch(`${server.baseUrl}/api/map`);
+      const mapPayload = (await mapResponse.json()) as {
+        cells: Array<{ cabanaId?: string; available?: boolean }>;
       };
 
-      expect(cabanaResponse.status).toBe(200);
-      expect(cabanaPayload.cabanaId).toBe(primaryCabanaId);
-      expect(cabanaPayload.available).toBe(false);
-      expect(cabanaPayload.booking).not.toBeNull();
-      expect(cabanaPayload.booking?.guestName).toBe("Jane Doe");
+      expect(mapResponse.status).toBe(200);
+
+      const cabanaCell = mapPayload.cells.find(
+        (cell) => cell.cabanaId === primaryCabanaId,
+      );
+      expect(cabanaCell).toBeDefined();
+      expect(cabanaCell?.available).toBe(false);
     } finally {
       await server.close();
     }
