@@ -121,12 +121,14 @@ function findPoolRegions(cells: ResortMapCell[]): PoolRegion[] {
     let maxRow = cell.row;
     let minCol = cell.col;
     let maxCol = cell.col;
+    let cellCount = 0;
     const queue = [key];
     visited.add(key);
 
     while (queue.length > 0) {
       const current = queue.shift()!;
       const [r, c] = current.split(":").map(Number);
+      cellCount += 1;
       minRow = Math.min(minRow, r);
       maxRow = Math.max(maxRow, r);
       minCol = Math.min(minCol, c);
@@ -147,7 +149,10 @@ function findPoolRegions(cells: ResortMapCell[]): PoolRegion[] {
       }
     }
 
-    regions.push({ minRow, maxRow, minCol, maxCol });
+    const boxArea = (maxRow - minRow + 1) * (maxCol - minCol + 1);
+    if (cellCount === boxArea) {
+      regions.push({ minRow, maxRow, minCol, maxCol });
+    }
   }
 
   return regions;
