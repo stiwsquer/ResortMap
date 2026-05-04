@@ -6,6 +6,8 @@ interface BookingModalProps {
   cabanaId: string;
   isSubmitting: boolean;
   submitErrorMessage: string;
+  successMessage: string;
+  infoMessage: string;
   onCancel: () => void;
   onSubmit: (formData: BookingFormData) => Promise<void> | void;
 }
@@ -19,6 +21,8 @@ export function BookingModal({
   cabanaId,
   isSubmitting,
   submitErrorMessage,
+  successMessage,
+  infoMessage,
   onCancel,
   onSubmit,
 }: BookingModalProps): JSX.Element | null {
@@ -79,62 +83,102 @@ export function BookingModal({
         className="modal"
         role="dialog"
         aria-modal="true"
-        aria-label={`Book ${cabanaId}`}
+        aria-label={
+          successMessage
+            ? "Booking confirmed"
+            : infoMessage
+              ? "Info"
+              : `Book ${cabanaId}`
+        }
         onClick={(event: any) => event.stopPropagation()}
       >
-        <h2>Book Cabana</h2>
-        <p className="modal-subtitle">{cabanaId}</p>
+        {successMessage ? (
+          <>
+            <h2>Booking Confirmed</h2>
+            <p className="modal-subtitle">{successMessage}</p>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="button-primary"
+                onClick={onCancel}
+              >
+                Close
+              </button>
+            </div>
+          </>
+        ) : infoMessage ? (
+          <>
+            <h2>Unavailable</h2>
+            <p className="modal-subtitle">{infoMessage}</p>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="button-secondary"
+                onClick={onCancel}
+              >
+                Close
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <h2>Book Cabana</h2>
+            <p className="modal-subtitle">{cabanaId}</p>
 
-        <form onSubmit={handleSubmit} className="booking-form">
-          <label htmlFor="roomNumber">Room number</label>
-          <input
-            id="roomNumber"
-            name="roomNumber"
-            value={roomNumber}
-            onChange={(event: any) =>
-              setRoomNumber(String(event.target.value ?? ""))
-            }
-            autoComplete="off"
-            maxLength={20}
-            disabled={isSubmitting}
-          />
+            <form onSubmit={handleSubmit} className="booking-form">
+              <label htmlFor="roomNumber">Room number</label>
+              <input
+                id="roomNumber"
+                name="roomNumber"
+                value={roomNumber}
+                onChange={(event: any) =>
+                  setRoomNumber(String(event.target.value ?? ""))
+                }
+                autoComplete="off"
+                maxLength={20}
+                disabled={isSubmitting}
+              />
 
-          <label htmlFor="guestName">Guest name</label>
-          <input
-            id="guestName"
-            name="guestName"
-            value={guestName}
-            onChange={(event: any) =>
-              setGuestName(String(event.target.value ?? ""))
-            }
-            autoComplete="name"
-            maxLength={100}
-            disabled={isSubmitting}
-          />
+              <label htmlFor="guestName">Guest name</label>
+              <input
+                id="guestName"
+                name="guestName"
+                value={guestName}
+                onChange={(event: any) =>
+                  setGuestName(String(event.target.value ?? ""))
+                }
+                autoComplete="name"
+                maxLength={100}
+                disabled={isSubmitting}
+              />
 
-          {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
-          {submitErrorMessage ? (
-            <p className="form-error">{submitErrorMessage}</p>
-          ) : null}
+              {errorMessage ? (
+                <p className="form-error">{errorMessage}</p>
+              ) : null}
+              {submitErrorMessage ? (
+                <p className="form-error">{submitErrorMessage}</p>
+              ) : null}
 
-          <div className="modal-actions">
-            <button
-              type="button"
-              className="button-secondary"
-              onClick={onCancel}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="button-primary"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Booking..." : "Confirm Booking"}
-            </button>
-          </div>
-        </form>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="button-secondary"
+                  onClick={onCancel}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="button-primary"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Booking..." : "Confirm Booking"}
+                </button>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );

@@ -35,13 +35,12 @@ export function App(): JSX.Element {
         }
 
         setMapData(data);
-        setInfoMessage("");
       } catch {
         if (!isMounted) {
           return;
         }
 
-        setInfoMessage("Unable to load live map data. Please retry.");
+        // handled by isLoadingMap staying false with null mapData
       } finally {
         if (isMounted) {
           setIsLoadingMap(false);
@@ -72,6 +71,7 @@ export function App(): JSX.Element {
     }
 
     setSuccessMessage("");
+    setInfoMessage("");
 
     if (!cell.available) {
       setInfoMessage(
@@ -80,13 +80,14 @@ export function App(): JSX.Element {
       return;
     }
 
-    setInfoMessage("");
     setSelectedCabana(cell);
   }
 
   function closeModal(): void {
     setSelectedCabana(null);
     setBookingSubmitError("");
+    setSuccessMessage("");
+    setInfoMessage("");
   }
 
   async function handleBookingSubmit(formData: BookingFormData): Promise<void> {
@@ -103,8 +104,6 @@ export function App(): JSX.Element {
       await bookCabana(cabanaId, formData);
       await refreshMap();
 
-      setSelectedCabana(null);
-      setInfoMessage("");
       setSuccessMessage(
         `Booking confirmed for ${formData.guestName} (room ${formData.roomNumber}) at ${cabanaId}.`,
       );
@@ -115,7 +114,6 @@ export function App(): JSX.Element {
           : "Booking failed. Please try again.";
 
       setBookingSubmitError(message);
-      setSuccessMessage("");
     } finally {
       setIsSubmittingBooking(false);
     }
@@ -124,12 +122,7 @@ export function App(): JSX.Element {
   return (
     <main className="app-shell">
       <header className="app-header">
-        <div>
-          <h1>Resort Cabana Map</h1>
-          <p className="header-subtitle">
-            Interactive map with live API availability and booking.
-          </p>
-        </div>
+        <h1>Resort Cabana Map</h1>
         <p className="availability-pill">Available cabanas: {availableCount}</p>
       </header>
 
@@ -139,22 +132,21 @@ export function App(): JSX.Element {
         <p className="message message-info">Loading map...</p>
       ) : null}
 
-      {infoMessage ? (
-        <p className="message message-info">{infoMessage}</p>
-      ) : null}
-      {successMessage ? (
-        <p className="message message-success">{successMessage}</p>
-      ) : null}
-
       {mapData ? (
         <ResortGrid map={mapData} onCabanaClick={handleCabanaClick} />
       ) : null}
 
       <BookingModal
-        isOpen={Boolean(selectedCabana?.cabanaId)}
+        isOpen={
+          Boolean(selectedCabana?.cabanaId) ||
+          Boolean(successMessage) ||
+          Boolean(infoMessage)
+        }
         cabanaId={selectedCabana?.cabanaId ?? ""}
         isSubmitting={isSubmittingBooking}
         submitErrorMessage={bookingSubmitError}
+        successMessage={successMessage}
+        infoMessage={infoMessage}
         onCancel={closeModal}
         onSubmit={handleBookingSubmit}
       />
