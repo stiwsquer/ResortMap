@@ -124,6 +124,35 @@ body {
   border: 1px solid #82d3b5;
 }
 
+.message-error {
+  background: #fbe6e6;
+  border: 1px solid #d89b9b;
+  color: #6e1f1f;
+}
+
+.message-error p {
+  margin: 0;
+}
+
+.message-action {
+  margin-top: 8px;
+}
+
+.info-toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  max-width: min(420px, calc(100vw - 32px));
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fef3d6;
+  border: 1px solid #f0cc73;
+  color: #4d3a16;
+  box-shadow: var(--shadow);
+  z-index: 200;
+}
+
 .resort-grid-scroll {
   display: inline-block;
   overflow: auto;
@@ -302,6 +331,12 @@ body {
 .modal-subtitle {
   margin: 6px 0 14px;
   opacity: 0.85;
+}
+
+.modal-countdown {
+  margin: -4px 0 10px;
+  font-size: 0.9rem;
+  color: #51401f;
 }
 
 .booking-form {

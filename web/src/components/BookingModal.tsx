@@ -7,7 +7,7 @@ interface BookingModalProps {
   isSubmitting: boolean;
   submitErrorMessage: string;
   successMessage: string;
-  infoMessage: string;
+  successCountdown: number | null;
   onCancel: () => void;
   onSubmit: (formData: BookingFormData) => Promise<void> | void;
 }
@@ -22,7 +22,7 @@ export function BookingModal({
   isSubmitting,
   submitErrorMessage,
   successMessage,
-  infoMessage,
+  successCountdown,
   onCancel,
   onSubmit,
 }: BookingModalProps): JSX.Element | null {
@@ -141,24 +141,15 @@ export function BookingModal({
           <>
             <h2 id="modal-heading">Booking Confirmed</h2>
             <p className="modal-subtitle">{successMessage}</p>
+            {typeof successCountdown === "number" && successCountdown > 0 ? (
+              <p className="modal-countdown" role="status" aria-live="polite">
+                Closing in {successCountdown}s...
+              </p>
+            ) : null}
             <div className="modal-actions">
               <button
                 type="button"
                 className="button-primary"
-                onClick={onCancel}
-              >
-                Close
-              </button>
-            </div>
-          </>
-        ) : infoMessage ? (
-          <>
-            <h2 id="modal-heading">Unavailable</h2>
-            <p className="modal-subtitle">{infoMessage}</p>
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="button-secondary"
                 onClick={onCancel}
               >
                 Close

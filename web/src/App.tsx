@@ -6,16 +6,29 @@ import { ResortGrid } from "./components/ResortGrid";
 import { BookingFormData, ResortMapCell, ResortMapData } from "./types";
 import "./styles/app.css";
 
+const SUCCESS_DIALOG_AUTO_CLOSE_SECONDS = 10;
+const UNAVAILABLE_TOAST_MS = 4000;
+
+function toErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+
+  return fallback;
+}
+
 export function App(): JSX.Element {
   const [mapData, setMapData] = useState<ResortMapData | null>(null);
   const [isLoadingMap, setIsLoadingMap] = useState(true);
+  const [mapLoadError, setMapLoadError] = useState("");
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
   const [bookingSubmitError, setBookingSubmitError] = useState("");
   const [selectedCabana, setSelectedCabana] = useState<ResortMapCell | null>(
     null,
   );
-  const [infoMessage, setInfoMessage] = useState("");
+  const [unavailableToast, setUnavailableToast] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [successCountdown, setSuccessCountdown] = useState<number | null>(null);
 
   async function refreshMap(): Promise<ResortMapData> {
     const data = await fetchMapData();
@@ -27,6 +40,11 @@ export function App(): JSX.Element {
     let isMounted = true;
 
     async function load(): Promise<void> {
+      if (isMounted) {
+        setIsLoadingMap(true);
+        setMapLoadError("");
+      }
+
       try {
         const data = await fetchMapData();
 
@@ -35,12 +53,15 @@ export function App(): JSX.Element {
         }
 
         setMapData(data);
-      } catch {
+      } catch (error) {
         if (!isMounted) {
           return;
         }
 
-        // handled by isLoadingMap staying false with null mapData
+        setMapData(null);
+        setMapLoadError(
+          toErrorMessage(error, "Failed to load map. Please try again."),
+        );
       } finally {
         if (isMounted) {
           setIsLoadingMap(false);
@@ -54,6 +75,41 @@ export function App(): JSX.Element {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!unavailableToast) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setUnavailableToast("");
+    }, UNAVAILABLE_TOAST_MS);
+
+    return () => window.clearTimeout(timeout);
+  }, [unavailableToast]);
+
+  useEffect(() => {
+    if (!successMessage || successCountdown === null) {
+      return;
+    }
+
+    if (successCountdown <= 0) {
+      closeModal();
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setSuccessCountdown((seconds) => {
+        if (seconds === null) {
+          return null;
+        }
+
+        return seconds - 1;
+      });
+    }, 1000);
+
+    return () => window.clearTimeout(timeout);
+  }, [successMessage, successCountdown]);
 
   const availableCount = useMemo(() => {
     if (!mapData) {
@@ -71,10 +127,11 @@ export function App(): JSX.Element {
     }
 
     setSuccessMessage("");
-    setInfoMessage("");
+    setSuccessCountdown(null);
+    setUnavailableToast("");
 
     if (!cell.available) {
-      setInfoMessage(
+      setUnavailableToast(
         "This cabana is currently unavailable. Please choose another one.",
       );
       return;
@@ -87,7 +144,24 @@ export function App(): JSX.Element {
     setSelectedCabana(null);
     setBookingSubmitError("");
     setSuccessMessage("");
-    setInfoMessage("");
+    setSuccessCountdown(null);
+  }
+
+  async function retryMapLoad(): Promise<void> {
+    setIsLoadingMap(true);
+    setMapLoadError("");
+
+    try {
+      const data = await fetchMapData();
+      setMapData(data);
+    } catch (error) {
+      setMapData(null);
+      setMapLoadError(
+        toErrorMessage(error, "Failed to load map. Please try again."),
+      );
+    } finally {
+      setIsLoadingMap(false);
+    }
   }
 
   async function handleBookingSubmit(formData: BookingFormData): Promise<void> {
@@ -107,11 +181,12 @@ export function App(): JSX.Element {
       setSuccessMessage(
         `Booking confirmed for ${formData.guestName} (room ${formData.roomNumber}) at ${cabanaId}.`,
       );
+      setSuccessCountdown(SUCCESS_DIALOG_AUTO_CLOSE_SECONDS);
     } catch (error) {
-      const message =
-        error instanceof Error && error.message
-          ? error.message
-          : "Booking failed. Please try again.";
+      const message = toErrorMessage(
+        error,
+        "Booking failed. Please try again.",
+      );
 
       setBookingSubmitError(message);
     } finally {
@@ -134,21 +209,36 @@ export function App(): JSX.Element {
         ) : null}
       </div>
 
+      {!isLoadingMap && mapLoadError ? (
+        <div className="message message-error" role="alert">
+          <p>{mapLoadError}</p>
+          <button
+            type="button"
+            className="button-secondary message-action"
+            onClick={() => void retryMapLoad()}
+          >
+            Retry loading map
+          </button>
+        </div>
+      ) : null}
+
+      {unavailableToast ? (
+        <p className="info-toast" role="status" aria-live="polite">
+          {unavailableToast}
+        </p>
+      ) : null}
+
       {mapData ? (
         <ResortGrid map={mapData} onCabanaClick={handleCabanaClick} />
       ) : null}
 
       <BookingModal
-        isOpen={
-          Boolean(selectedCabana?.cabanaId) ||
-          Boolean(successMessage) ||
-          Boolean(infoMessage)
-        }
+        isOpen={Boolean(selectedCabana?.cabanaId) || Boolean(successMessage)}
         cabanaId={selectedCabana?.cabanaId ?? ""}
         isSubmitting={isSubmittingBooking}
         submitErrorMessage={bookingSubmitError}
         successMessage={successMessage}
-        infoMessage={infoMessage}
+        successCountdown={successCountdown}
         onCancel={closeModal}
         onSubmit={handleBookingSubmit}
       />
