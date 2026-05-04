@@ -17,7 +17,11 @@ describe("BookingService", () => {
   it("books an available cabana and stores normalized booking data", () => {
     const service = createBookingService();
 
-    const booking = service.bookCabana(primaryCabanaId, " 101 ", "  Jane   Doe ");
+    const booking = service.bookCabana(
+      primaryCabanaId,
+      " 101 ",
+      "  Jane   Doe ",
+    );
 
     expect(booking).toMatchObject({
       cabanaId: primaryCabanaId,
@@ -42,6 +46,40 @@ describe("BookingService", () => {
       expect(error).toBeInstanceOf(BookingDomainError);
       const domainError = error as BookingDomainError;
       expect(domainError.code).toBe("INVALID_INPUT");
+    }
+  });
+
+  it("throws INVALID_INPUT when room number is too long", () => {
+    const service = createBookingService();
+
+    expect(() =>
+      service.bookCabana(primaryCabanaId, "1".repeat(21), "Jane Doe"),
+    ).toThrowError(BookingDomainError);
+
+    try {
+      service.bookCabana(primaryCabanaId, "1".repeat(21), "Jane Doe");
+    } catch (error) {
+      expect(error).toBeInstanceOf(BookingDomainError);
+      const domainError = error as BookingDomainError;
+      expect(domainError.code).toBe("INVALID_INPUT");
+      expect(domainError.message).toBe("Room number is too long.");
+    }
+  });
+
+  it("throws INVALID_INPUT when guest name is too long", () => {
+    const service = createBookingService();
+
+    expect(() =>
+      service.bookCabana(primaryCabanaId, "101", "A".repeat(101)),
+    ).toThrowError(BookingDomainError);
+
+    try {
+      service.bookCabana(primaryCabanaId, "101", "A".repeat(101));
+    } catch (error) {
+      expect(error).toBeInstanceOf(BookingDomainError);
+      const domainError = error as BookingDomainError;
+      expect(domainError.code).toBe("INVALID_INPUT");
+      expect(domainError.message).toBe("Guest name is too long.");
     }
   });
 

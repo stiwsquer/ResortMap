@@ -139,6 +139,50 @@ describe("createApp API routes", () => {
     }
   });
 
+  it("returns 422 for oversized booking payload values", async () => {
+    const server = await startAppServer();
+
+    try {
+      const longRoomResponse = await fetch(
+        `${server.baseUrl}/api/cabanas/${encodeURIComponent(primaryCabanaId)}/book`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            roomNumber: "1".repeat(21),
+            guestName: "Jane Doe",
+          }),
+        },
+      );
+      const longRoomPayload = (await longRoomResponse.json()) as {
+        message: string;
+      };
+
+      expect(longRoomResponse.status).toBe(422);
+      expect(longRoomPayload.message).toBe("Room number is too long.");
+
+      const longGuestResponse = await fetch(
+        `${server.baseUrl}/api/cabanas/${encodeURIComponent(primaryCabanaId)}/book`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            roomNumber: "101",
+            guestName: "A".repeat(101),
+          }),
+        },
+      );
+      const longGuestPayload = (await longGuestResponse.json()) as {
+        message: string;
+      };
+
+      expect(longGuestResponse.status).toBe(422);
+      expect(longGuestPayload.message).toBe("Guest name is too long.");
+    } finally {
+      await server.close();
+    }
+  });
+
   it("maps domain errors to expected status codes", async () => {
     const server = await startAppServer();
 

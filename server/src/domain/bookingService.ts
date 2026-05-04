@@ -1,17 +1,17 @@
-import { normalizeGuestName, normalizeRoomNumber } from './normalization';
+import { normalizeGuestName, normalizeRoomNumber } from "./normalization";
 
 export type BookingErrorCode =
-  | 'CABANA_NOT_FOUND'
-  | 'CABANA_ALREADY_BOOKED'
-  | 'INVALID_GUEST'
-  | 'INVALID_INPUT';
+  | "CABANA_NOT_FOUND"
+  | "CABANA_ALREADY_BOOKED"
+  | "INVALID_GUEST"
+  | "INVALID_INPUT";
 
 export class BookingDomainError extends Error {
   public readonly code: BookingErrorCode;
 
   constructor(code: BookingErrorCode, message: string) {
     super(message);
-    this.name = 'BookingDomainError';
+    this.name = "BookingDomainError";
     this.code = code;
   }
 }
@@ -27,6 +27,9 @@ export interface BookingServiceOptions {
   cabanaIds: string[];
   guestLookupByRoom: Map<string, string>;
 }
+
+const MAX_ROOM_NUMBER_LENGTH = 20;
+const MAX_GUEST_NAME_LENGTH = 100;
 
 export class BookingService {
   private readonly cabanaIds = new Set<string>();
@@ -62,34 +65,50 @@ export class BookingService {
     return this.guestLookupByRoom.get(normalizedRoom) === normalizedGuest;
   }
 
-  bookCabana(cabanaId: string, roomNumber: string, guestName: string): BookingRecord {
+  bookCabana(
+    cabanaId: string,
+    roomNumber: string,
+    guestName: string,
+  ): BookingRecord {
     this.assertCabanaExists(cabanaId);
 
     const normalizedRoom = normalizeRoomNumber(roomNumber);
     const normalizedGuest = normalizeGuestName(guestName);
+    const sanitizedGuestName = guestName.trim().replace(/\s+/g, " ");
 
     if (!normalizedRoom || !normalizedGuest) {
       throw new BookingDomainError(
-        'INVALID_INPUT',
-        'Room number and guest name are required.'
+        "INVALID_INPUT",
+        "Room number and guest name are required.",
       );
+    }
+
+    if (normalizedRoom.length > MAX_ROOM_NUMBER_LENGTH) {
+      throw new BookingDomainError("INVALID_INPUT", "Room number is too long.");
+    }
+
+    if (sanitizedGuestName.length > MAX_GUEST_NAME_LENGTH) {
+      throw new BookingDomainError("INVALID_INPUT", "Guest name is too long.");
     }
 
     if (!this.validateGuest(normalizedRoom, normalizedGuest)) {
       throw new BookingDomainError(
-        'INVALID_GUEST',
-        'Room number and guest name do not match current guests.'
+        "INVALID_GUEST",
+        "Room number and guest name do not match current guests.",
       );
     }
 
     if (this.bookingsByCabanaId.has(cabanaId)) {
-      throw new BookingDomainError('CABANA_ALREADY_BOOKED', 'Cabana is already booked.');
+      throw new BookingDomainError(
+        "CABANA_ALREADY_BOOKED",
+        "Cabana is already booked.",
+      );
     }
 
     const booking: BookingRecord = {
       cabanaId,
       roomNumber: normalizedRoom,
-      guestName: guestName.trim().replace(/\s+/g, ' '),
+      guestName: sanitizedGuestName,
       bookedAt: new Date().toISOString(),
     };
 
@@ -110,7 +129,10 @@ export class BookingService {
 
   private assertCabanaExists(cabanaId: string): void {
     if (!this.cabanaIds.has(cabanaId)) {
-      throw new BookingDomainError('CABANA_NOT_FOUND', `Unknown cabana id: ${cabanaId}`);
+      throw new BookingDomainError(
+        "CABANA_NOT_FOUND",
+        `Unknown cabana id: ${cabanaId}`,
+      );
     }
   }
 }
