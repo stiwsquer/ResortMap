@@ -1,4 +1,11 @@
-import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import {
+  FormEvent,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { BookingFormData } from "../types";
 
 interface BookingModalProps {
@@ -31,6 +38,21 @@ export function BookingModal({
   const [errorMessage, setErrorMessage] = useState("");
   const modalRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<Element | null>(null);
+  const closeOnOverlayClickRef = useRef(false);
+
+  function handleOverlayMouseDown(event: MouseEvent<HTMLDivElement>): void {
+    closeOnOverlayClickRef.current = event.target === event.currentTarget;
+  }
+
+  function handleOverlayClick(event: MouseEvent<HTMLDivElement>): void {
+    const clickedOverlay = event.target === event.currentTarget;
+
+    if (clickedOverlay && closeOnOverlayClickRef.current) {
+      onCancel();
+    }
+
+    closeOnOverlayClickRef.current = false;
+  }
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -128,7 +150,12 @@ export function BookingModal({
   }
 
   return (
-    <div className="modal-overlay" role="presentation" onClick={onCancel}>
+    <div
+      className="modal-overlay"
+      role="presentation"
+      onMouseDown={handleOverlayMouseDown}
+      onClick={handleOverlayClick}
+    >
       <div
         ref={modalRef}
         className="modal"
