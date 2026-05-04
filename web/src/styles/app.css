@@ -1,0 +1,289 @@
+:root {
+  --bg: #f4f0e6;
+  --panel: #faf7ef;
+  --ink: #2e2516;
+  --accent: #0d826f;
+  --accent-2: #d17a00;
+  --danger: #9d2a2a;
+  --tile-size: clamp(18px, 2vw, 28px);
+  --radius: 12px;
+  --shadow: 0 12px 30px rgba(34, 28, 17, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top right, #fff7dc, var(--bg));
+  color: var(--ink);
+}
+
+.app-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+.app-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
+}
+
+.header-subtitle {
+  margin: 8px 0 0;
+  font-size: 0.95rem;
+  opacity: 0.78;
+}
+
+.availability-pill {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #d8f2ec;
+  font-weight: 600;
+}
+
+.legend {
+  background: var(--panel);
+  border-radius: var(--radius);
+  border: 1px solid #d9cfbb;
+  box-shadow: var(--shadow);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.legend h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.legend ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-chip {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.legend-cabana {
+  background: #fff3a8;
+}
+
+.legend-pool {
+  background: #8fd9e8;
+}
+
+.legend-path {
+  background: #8c7759;
+}
+
+.legend-chalet {
+  background: #be7752;
+}
+
+.legend-empty {
+  background: #ebe2d0;
+}
+
+.message {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.message-info {
+  background: #fef3d6;
+  border: 1px solid #f0cc73;
+}
+
+.message-success {
+  background: #ddf7ec;
+  border: 1px solid #82d3b5;
+}
+
+.resort-grid-scroll {
+  overflow: auto;
+  border-radius: var(--radius);
+  border: 1px solid #d9cfbb;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 12px;
+}
+
+.resort-grid {
+  display: grid;
+  gap: 1px;
+  width: max-content;
+  background: rgba(61, 48, 27, 0.2);
+}
+
+.tile {
+  width: var(--tile-size);
+  height: var(--tile-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  padding: 0;
+}
+
+.tile-empty {
+  background: #ebe2d0;
+}
+
+.tile-path {
+  background: #8c7759;
+}
+
+.tile-pool {
+  background: linear-gradient(145deg, #a6ebf8, #53bfd7);
+}
+
+.tile-chalet {
+  background: linear-gradient(145deg, #ce8f70, #9f5f3d);
+}
+
+.tile-cabana-available {
+  cursor: pointer;
+  background: linear-gradient(150deg, #fff8c2, #f8d651);
+  color: #3a2a00;
+}
+
+.tile-cabana-available:hover {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+}
+
+.tile-cabana-booked {
+  cursor: not-allowed;
+  background: repeating-linear-gradient(
+    135deg,
+    #b4a692,
+    #b4a692 6px,
+    #91816b 6px,
+    #91816b 12px
+  );
+  color: #2f2312;
+}
+
+.cabana-glyph {
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.cabana-state {
+  display: none;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(27, 22, 14, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.modal {
+  width: min(100%, 420px);
+  background: #fffdf8;
+  border-radius: 14px;
+  border: 1px solid #d6ccb8;
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.modal h2 {
+  margin: 0;
+}
+
+.modal-subtitle {
+  margin: 6px 0 14px;
+  opacity: 0.7;
+}
+
+.booking-form {
+  display: grid;
+  gap: 10px;
+}
+
+.booking-form label {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.booking-form input {
+  border: 1px solid #b7ac97;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.95rem;
+}
+
+.form-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.88rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.button-primary,
+.button-secondary {
+  border: none;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.button-secondary {
+  background: #e6ded0;
+  color: var(--ink);
+}
+
+@media (max-width: 640px) {
+  :root {
+    --tile-size: 18px;
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: start;
+  }
+}
