@@ -11,14 +11,14 @@ describe("Legend", () => {
     expect(screen.getByText("Pool")).toBeInTheDocument();
     expect(screen.getByText("Path")).toBeInTheDocument();
     expect(screen.getByText("Chalet")).toBeInTheDocument();
-    expect(screen.getByText("Empty")).toBeInTheDocument();
+    expect(screen.queryByText("Empty")).not.toBeInTheDocument();
   });
 
   it("marks icon images as decorative", () => {
     const { container } = render(<Legend />);
 
     const images = container.querySelectorAll("img");
-    expect(images.length).toBe(5);
+    expect(images.length).toBe(4);
 
     images.forEach((img: HTMLImageElement) => {
       expect(img).toHaveAttribute("alt", "");

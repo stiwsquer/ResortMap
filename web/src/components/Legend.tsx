@@ -1,6 +1,5 @@
 import cabanaAsset from "../../../assets/cabana.png";
 import chaletAsset from "../../../assets/houseChimney.png";
-import parchmentAsset from "../../../assets/parchmentBasic.png";
 import poolAsset from "../../../assets/pool.png";
 import arrowStraightAsset from "../../../assets/arrowStraight.png";
 
@@ -35,14 +34,6 @@ export function Legend(): JSX.Element {
             alt=""
           />{" "}
           Chalet
-        </li>
-        <li>
-          <img
-            className="legend-chip legend-chip-empty"
-            src={parchmentAsset}
-            alt=""
-          />{" "}
-          Empty
         </li>
       </ul>
     </section>
