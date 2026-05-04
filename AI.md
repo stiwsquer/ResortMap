@@ -17,6 +17,7 @@ Main usage patterns:
 3. Generate and apply targeted patches for requested changes.
 4. Iterate on failing/flaky tests and stabilize timer-based assertions.
 5. Prepare documentation updates for run/test instructions and trade-offs.
+6. Review completed code and tests with AI for requirement coverage and edge cases.
 
 ## Prompt style
 
@@ -36,4 +37,4 @@ Typical prompts were short and task-oriented, for example:
 
 ## Human decisions
 
-Final choices (architecture, UX behavior, trade-offs, and scope boundaries) were made by the developer, with AI suggestions reviewed and adjusted before acceptance.
+Final choices (architecture, UX behavior, trade-offs, and scope boundaries) were made by the developer, with AI suggestions reviewed and adjusted before acceptance. The final implementation was also reviewed with AI to validate requirement alignment and identify improvement opportunities.

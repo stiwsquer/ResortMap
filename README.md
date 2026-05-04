@@ -76,7 +76,7 @@ npm run test:server:watch
 
 ## Design decisions and trade-offs
 
-The backend keeps booking state in memory to keep the solution simple and focused on the coding task. This means bookings reset when the process restarts. The frontend uses a pull-based REST integration (reload map after successful booking), which is straightforward but does not provide cross-client real-time updates without adding polling/WebSockets. Styling is plain CSS for low tooling overhead and readability, at the cost of fewer utility abstractions. Form validation is intentionally lightweight for the small booking form and delegated to backend rules for final validation.
+The backend keeps booking state in memory to keep the solution simple and focused on the coding task. This means bookings reset when the process restarts. The frontend uses a pull-based REST integration (reload map after successful booking), which is straightforward but does not provide cross-client real-time updates without adding polling/WebSockets. Styling is plain CSS for low tooling overhead and readability, at the cost of fewer utility abstractions. Form validation is intentionally lightweight for the small booking form and delegated to backend rules for final validation. Rate limiting is intentionally not implemented for this exercise; in production, the booking endpoint should be protected with per-IP/per-session throttling to reduce brute-force and abuse risk.
 
 ## Screenshot
 
