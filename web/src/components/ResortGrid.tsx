@@ -182,7 +182,12 @@ export function ResortGrid({
   }
 
   return (
-    <div className="resort-grid-wrapper">
+    <div
+      className="resort-grid-wrapper"
+      id="map-region"
+      role="region"
+      aria-label="Resort map"
+    >
       <div className="resort-grid-scroll">
         <div
           className="resort-grid"

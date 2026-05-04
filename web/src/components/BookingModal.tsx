@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { BookingFormData } from "../types";
 
 interface BookingModalProps {
@@ -29,14 +29,64 @@ export function BookingModal({
   const [roomNumber, setRoomNumber] = useState("");
   const [guestName, setGuestName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const modalRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<Element | null>(null);
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onCancel();
+        return;
+      }
+
+      if (event.key === "Tab" && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+
+        if (focusable.length === 0) {
+          return;
+        }
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    },
+    [onCancel],
+  );
 
   useEffect(() => {
     if (isOpen) {
+      triggerRef.current = document.activeElement;
       setRoomNumber("");
       setGuestName("");
       setErrorMessage("");
+      document.addEventListener("keydown", handleKeyDown);
+
+      requestAnimationFrame(() => {
+        const firstInput =
+          modalRef.current?.querySelector<HTMLElement>("input, button");
+        firstInput?.focus();
+      });
     }
-  }, [isOpen]);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+
+      if (!isOpen && triggerRef.current instanceof HTMLElement) {
+        triggerRef.current.focus();
+        triggerRef.current = null;
+      }
+    };
+  }, [isOpen, handleKeyDown]);
 
   if (!isOpen) {
     return null;
@@ -80,21 +130,16 @@ export function BookingModal({
   return (
     <div className="modal-overlay" role="presentation" onClick={onCancel}>
       <div
+        ref={modalRef}
         className="modal"
         role="dialog"
         aria-modal="true"
-        aria-label={
-          successMessage
-            ? "Booking confirmed"
-            : infoMessage
-              ? "Info"
-              : `Book ${cabanaId}`
-        }
+        aria-labelledby="modal-heading"
         onClick={(event: any) => event.stopPropagation()}
       >
         {successMessage ? (
           <>
-            <h2>Booking Confirmed</h2>
+            <h2 id="modal-heading">Booking Confirmed</h2>
             <p className="modal-subtitle">{successMessage}</p>
             <div className="modal-actions">
               <button
@@ -108,7 +153,7 @@ export function BookingModal({
           </>
         ) : infoMessage ? (
           <>
-            <h2>Unavailable</h2>
+            <h2 id="modal-heading">Unavailable</h2>
             <p className="modal-subtitle">{infoMessage}</p>
             <div className="modal-actions">
               <button
@@ -122,7 +167,7 @@ export function BookingModal({
           </>
         ) : (
           <>
-            <h2>Book Cabana</h2>
+            <h2 id="modal-heading">Book Cabana</h2>
             <p className="modal-subtitle">{cabanaId}</p>
 
             <form onSubmit={handleSubmit} className="booking-form">
@@ -137,6 +182,13 @@ export function BookingModal({
                 autoComplete="off"
                 maxLength={20}
                 disabled={isSubmitting}
+                required
+                aria-required="true"
+                aria-describedby={
+                  errorMessage || submitErrorMessage
+                    ? "booking-error"
+                    : undefined
+                }
               />
 
               <label htmlFor="guestName">Guest name</label>
@@ -150,13 +202,24 @@ export function BookingModal({
                 autoComplete="name"
                 maxLength={100}
                 disabled={isSubmitting}
+                required
+                aria-required="true"
+                aria-describedby={
+                  errorMessage || submitErrorMessage
+                    ? "booking-error"
+                    : undefined
+                }
               />
 
               {errorMessage ? (
-                <p className="form-error">{errorMessage}</p>
+                <p id="booking-error" className="form-error" role="alert">
+                  {errorMessage}
+                </p>
               ) : null}
               {submitErrorMessage ? (
-                <p className="form-error">{submitErrorMessage}</p>
+                <p id="booking-error" className="form-error" role="alert">
+                  {submitErrorMessage}
+                </p>
               ) : null}
 
               <div className="modal-actions">

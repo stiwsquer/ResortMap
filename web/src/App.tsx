@@ -128,9 +128,11 @@ export function App(): JSX.Element {
 
       <Legend />
 
-      {isLoadingMap ? (
-        <p className="message message-info">Loading map...</p>
-      ) : null}
+      <div aria-live="polite" aria-atomic="true">
+        {isLoadingMap ? (
+          <p className="message message-info">Loading map...</p>
+        ) : null}
+      </div>
 
       {mapData ? (
         <ResortGrid map={mapData} onCabanaClick={handleCabanaClick} />
