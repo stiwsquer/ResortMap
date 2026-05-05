@@ -237,7 +237,7 @@ export function ResortGrid({
           disabled={sizeIndex === 0}
           aria-label="Zoom out"
         >
-          {"\u2212"}
+          -
         </button>
         <button
           type="button"
